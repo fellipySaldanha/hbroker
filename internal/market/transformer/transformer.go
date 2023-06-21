@@ -1,8 +1,8 @@
 package transformer
 
 import (
-	"github.com/fellipySaldanha/hbroker/internal/market/dto"
-	"github.com/fellipySaldanha/hbroker/internal/market/entity"
+	"github.com/fellipySaldanha/hbroker/go/internal/market/dto"
+	"github.com/fellipySaldanha/hbroker/go/internal/market/entity"
 )
 
 func TransformInput(input dto.TradeInput) *entity.Order {
