@@ -4,33 +4,34 @@ import (
 	"sync"
 	"testing"
 
+	"github.com/fellipySaldanha/hbroker/go/internal/market/entity"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestBuyAsset(t *testing.T) {
-	asset1 := NewAsset("asset1", "Asset 1", 100)
+	asset1 := entity.NewAsset("asset1", "Asset 1", 100)
 
-	investor := NewInvestor("1")
-	investor2 := NewInvestor("2")
+	investor := entity.NewInvestor("1")
+	investor2 := entity.NewInvestor("2")
 
-	investorAssetPosition := NewInvestorAssetPosition("asset1", 10)
+	investorAssetPosition := entity.NewInvestorAssetPosition("asset1", 10)
 	investor.AddAssetPosition(investorAssetPosition)
 
 	wg := sync.WaitGroup{}
-	orderChan := make(chan *Order)
-	orderChanOut := make(chan *Order)
+	orderChan := make(chan *entity.Order)
+	orderChanOut := make(chan *entity.Order)
 
-	book := NewBook(orderChan, orderChanOut, &wg)
+	book := entity.NewBook(orderChan, orderChanOut, &wg)
 	go book.Trade()
 
 	// add buy order
 	wg.Add(1)
-	order := NewOrder("1", investor, asset1, 5, 5, "SELL")
+	order := entity.NewOrder("1", investor, asset1, 5, 5, "SELL")
 	orderChan <- order
 
 	// add sell order
 
-	order2 := NewOrder("2", investor2, asset1, 5, 5, "BUY")
+	order2 := entity.NewOrder("2", investor2, asset1, 5, 5, "BUY")
 	orderChan <- order2
 	wg.Wait()
 
@@ -45,29 +46,29 @@ func TestBuyAsset(t *testing.T) {
 }
 
 func TestBuyAssetWithDifferentAssents(t *testing.T) {
-	asset1 := NewAsset("asset1", "Asset 1", 100)
-	asset2 := NewAsset("asset2", "Asset 2", 100)
+	asset1 := entity.NewAsset("asset1", "Asset 1", 100)
+	asset2 := entity.NewAsset("asset2", "Asset 2", 100)
 
-	investor := NewInvestor("1")
-	investor2 := NewInvestor("2")
+	investor := entity.NewInvestor("1")
+	investor2 := entity.NewInvestor("2")
 
-	investorAssetPosition := NewInvestorAssetPosition("asset1", 10)
+	investorAssetPosition := entity.NewInvestorAssetPosition("asset1", 10)
 	investor.AddAssetPosition(investorAssetPosition)
 
-	investorAssetPosition2 := NewInvestorAssetPosition("asset2", 10)
+	investorAssetPosition2 := entity.NewInvestorAssetPosition("asset2", 10)
 	investor2.AddAssetPosition(investorAssetPosition2)
 
 	wg := sync.WaitGroup{}
-	orderChan := make(chan *Order)
-	orderChanOut := make(chan *Order)
+	orderChan := make(chan *entity.Order)
+	orderChanOut := make(chan *entity.Order)
 
-	book := NewBook(orderChan, orderChanOut, &wg)
+	book := entity.NewBook(orderChan, orderChanOut, &wg)
 	go book.Trade()
 
-	order := NewOrder("1", investor, asset1, 5, 5, "SELL")
+	order := entity.NewOrder("1", investor, asset1, 5, 5, "SELL")
 	orderChan <- order
 
-	order2 := NewOrder("2", investor2, asset2, 5, 5, "BUY")
+	order2 := entity.NewOrder("2", investor2, asset2, 5, 5, "BUY")
 	orderChan <- order2
 
 	assert := assert.New(t)
@@ -78,32 +79,32 @@ func TestBuyAssetWithDifferentAssents(t *testing.T) {
 }
 
 func TestBuyPartialAsset(t *testing.T) {
-	asset1 := NewAsset("asset1", "Asset 1", 100)
+	asset1 := entity.NewAsset("asset1", "Asset 1", 100)
 
-	investor := NewInvestor("1")
-	investor2 := NewInvestor("2")
-	investor3 := NewInvestor("3")
+	investor := entity.NewInvestor("1")
+	investor2 := entity.NewInvestor("2")
+	investor3 := entity.NewInvestor("3")
 
-	investorAssetPosition := NewInvestorAssetPosition("asset1", 3)
+	investorAssetPosition := entity.NewInvestorAssetPosition("asset1", 3)
 	investor.AddAssetPosition(investorAssetPosition)
 
-	investorAssetPosition2 := NewInvestorAssetPosition("asset1", 5)
+	investorAssetPosition2 := entity.NewInvestorAssetPosition("asset1", 5)
 	investor3.AddAssetPosition(investorAssetPosition2)
 
 	wg := sync.WaitGroup{}
-	orderChan := make(chan *Order)
-	orderChanOut := make(chan *Order)
+	orderChan := make(chan *entity.Order)
+	orderChanOut := make(chan *entity.Order)
 
-	book := NewBook(orderChan, orderChanOut, &wg)
+	book := entity.NewBook(orderChan, orderChanOut, &wg)
 	go book.Trade()
 
 	wg.Add(1)
 	// investidor 2 quer comprar 5 shares
-	order2 := NewOrder("1", investor2, asset1, 5, 5.0, "BUY")
+	order2 := entity.NewOrder("1", investor2, asset1, 5, 5.0, "BUY")
 	orderChan <- order2
 
 	// investidor 1 quer vender 3 shares
-	order := NewOrder("2", investor, asset1, 3, 5.0, "SELL")
+	order := entity.NewOrder("2", investor, asset1, 3, 5.0, "SELL")
 	orderChan <- order
 
 	assert := assert.New(t)
@@ -125,7 +126,7 @@ func TestBuyPartialAsset(t *testing.T) {
 	assert.Equal(3, investor2.GetAssetPosition("asset1").Shares, "Investor 2 should have 3 shares of asset 1")
 
 	wg.Add(1)
-	order3 := NewOrder("3", investor3, asset1, 2, 5.0, "SELL")
+	order3 := entity.NewOrder("3", investor3, asset1, 2, 5.0, "SELL")
 	orderChan <- order3
 	wg.Wait()
 
@@ -141,33 +142,33 @@ func TestBuyPartialAsset(t *testing.T) {
 }
 
 func TestBuyWithDifferentPrice(t *testing.T) {
-	asset1 := NewAsset("asset1", "Asset 1", 100)
+	asset1 := entity.NewAsset("asset1", "Asset 1", 100)
 
-	investor := NewInvestor("1")
-	investor2 := NewInvestor("2")
-	investor3 := NewInvestor("3")
+	investor := entity.NewInvestor("1")
+	investor2 := entity.NewInvestor("2")
+	investor3 := entity.NewInvestor("3")
 
-	investorAssetPosition := NewInvestorAssetPosition("asset1", 3)
+	investorAssetPosition := entity.NewInvestorAssetPosition("asset1", 3)
 	investor.AddAssetPosition(investorAssetPosition)
 
-	investorAssetPosition2 := NewInvestorAssetPosition("asset1", 5)
+	investorAssetPosition2 := entity.NewInvestorAssetPosition("asset1", 5)
 	investor3.AddAssetPosition(investorAssetPosition2)
 
 	wg := sync.WaitGroup{}
-	orderChan := make(chan *Order)
+	orderChan := make(chan *entity.Order)
 
-	orderChanOut := make(chan *Order)
+	orderChanOut := make(chan *entity.Order)
 
-	book := NewBook(orderChan, orderChanOut, &wg)
+	book := entity.NewBook(orderChan, orderChanOut, &wg)
 	go book.Trade()
 
 	wg.Add(1)
 	// investidor 2 quer comprar 5 shares
-	order2 := NewOrder("2", investor2, asset1, 5, 5.0, "BUY")
+	order2 := entity.NewOrder("2", investor2, asset1, 5, 5.0, "BUY")
 	orderChan <- order2
 
 	// investidor 1 quer vender 3 shares
-	order := NewOrder("1", investor, asset1, 3, 4.0, "SELL")
+	order := entity.NewOrder("1", investor, asset1, 3, 4.0, "SELL")
 	orderChan <- order
 
 	go func() {
@@ -187,7 +188,7 @@ func TestBuyWithDifferentPrice(t *testing.T) {
 	assert.Equal(3, investor2.GetAssetPosition("asset1").Shares, "Investor 2 should have 3 shares of asset 1")
 
 	wg.Add(1)
-	order3 := NewOrder("3", investor3, asset1, 3, 4.5, "SELL")
+	order3 := entity.NewOrder("3", investor3, asset1, 3, 4.5, "SELL")
 	orderChan <- order3
 
 	wg.Wait()
@@ -204,29 +205,29 @@ func TestBuyWithDifferentPrice(t *testing.T) {
 }
 
 func TestNoMatch(t *testing.T) {
-	asset1 := NewAsset("asset1", "Asset 1", 100)
+	asset1 := entity.NewAsset("asset1", "Asset 1", 100)
 
-	investor := NewInvestor("1")
-	investor2 := NewInvestor("2")
+	investor := entity.NewInvestor("1")
+	investor2 := entity.NewInvestor("2")
 
-	investorAssetPosition := NewInvestorAssetPosition("asset1", 3)
+	investorAssetPosition := entity.NewInvestorAssetPosition("asset1", 3)
 	investor.AddAssetPosition(investorAssetPosition)
 
 	wg := sync.WaitGroup{}
-	orderChan := make(chan *Order)
+	orderChan := make(chan *entity.Order)
 
-	orderChanOut := make(chan *Order)
+	orderChanOut := make(chan *entity.Order)
 
-	book := NewBook(orderChan, orderChanOut, &wg)
+	book := entity.NewBook(orderChan, orderChanOut, &wg)
 	go book.Trade()
 
 	wg.Add(0)
 	// investidor 1 quer vender 3 shares
-	order := NewOrder("1", investor, asset1, 3, 6.0, "SELL")
+	order := entity.NewOrder("1", investor, asset1, 3, 6.0, "SELL")
 	orderChan <- order
 
 	// investidor 2 quer comprar 5 shares
-	order2 := NewOrder("2", investor2, asset1, 5, 5.0, "BUY")
+	order2 := entity.NewOrder("2", investor2, asset1, 5, 5.0, "BUY")
 	orderChan <- order2
 
 	go func() {
